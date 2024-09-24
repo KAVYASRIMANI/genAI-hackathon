@@ -1,0 +1,36 @@
+import fitz  # PyMuPDF
+from transformers import pipeline
+
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    with fitz.open(pdf_path) as doc:
+        for page in doc:
+            text += page.get_text()
+    return text
+
+def generate_qa(text):
+    qa_pipeline = pipeline("question-answering")
+    questions = [
+        "What is the main topic?",
+        "What are the key points?",
+        "What conclusions can be drawn?"
+    ]
+    
+    qa_pairs = []
+    for question in questions:
+        result = qa_pipeline(question=question, context=text)
+        qa_pairs.append((question, result['answer']))
+    
+    return qa_pairs
+
+def main():
+    pdf_path = 'path/to/your/file.pdf'  # Replace with your PDF file path
+    text = extract_text_from_pdf(pdf_path)
+    
+    if text:
+        qa_pairs = generate_qa(text)
+        for question, answer in qa_pairs:
+            print(f"Q: {question}\nA: {answer}\n")
+
+if __name__ == "__main__":
+    main()
